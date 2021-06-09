@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "874057612073",
+    "firebase_url": "https://indian-railways-82942-default-rtdb.firebaseio.com",
+    "project_id": "indian-railways-82942",
+    "storage_bucket": "indian-railways-82942.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874057612073:android:bfd620048837ebe916d538",
+        "android_client_info": {
+          "package_name": "com.example.railways"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "874057612073-o7vh34i5kcneigqtf9ut8v5sge7ftb94.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1AI04xVpaK5cRUbyZLylXHb4WUklTtrE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "874057612073-o7vh34i5kcneigqtf9ut8v5sge7ftb94.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
