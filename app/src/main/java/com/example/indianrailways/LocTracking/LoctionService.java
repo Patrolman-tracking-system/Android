@@ -16,7 +16,6 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.text.format.Formatter;
@@ -47,14 +46,10 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class LoctionService extends Service {
     double lat = 0, long1 = 0;
@@ -68,67 +63,12 @@ public class LoctionService extends Service {
     double[] arrayLat = new double[5]; //to be fetched from db
     double[] arrayLong = new double[5];
     boolean[] status = new boolean[]{false, false, false, false, false};
-    double threshold = 3000;
+    double threshold = 300;
     int curDevCount = 0;
     WindowManager windowManager2;
     WindowManager.LayoutParams params;
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
     private final static String default_notification_channel_id = "default";
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        track = new com.example.indianrailways.LocTracking.Track();
-        reff = FirebaseDatabase.getInstance().getReference();
-        fStore = FirebaseFirestore.getInstance();
-//        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
-//        CollectionReference applicationsRef = rootRef.collection("Tracking");
-//        DocumentReference applicationIdRef = applicationsRef.document("Duty1");
-//        applicationIdRef.get().addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                DocumentSnapshot document = task.getResult();
-//                HashMap<Object,ArrayList> hm= (HashMap<Object, ArrayList>) document.get("Patrolman1.Trips");
-//                assert hm != null;
-////                or(Object al: Objects.requireNonNull(hm.get("Trip1"))){
-//                int i=0;
-//                for(Object al: Objects.requireNonNull(hm.get("Trip1"))){
-////                    for (int al=0;al<=hm.get("Trip1").size();al++){
-//                    Log.d("TAG", "LoctionService: hii");
-//                    HashMap<Object,Double> al1= (HashMap<Object, Double>) al;
-//                    Log.d("TAG", "LoctionService: al = "+al1.get("Latitude"));
-//
-//                    arrayLat[i]= al1.get("Latitude");
-//                    i++;
-//                }
-//            }
-//        });
-
-
-        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
-        CollectionReference applicationsRef = rootRef.collection("Original Coordinates");
-        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
-        applicationIdRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document.exists()) {
-                    List<Map<String, Double>> users = (List<Map<String, Double>>) document.get("Aurangabad");
-                    int i=0;
-                    for (Map<String, Double> al:users){
-                        Log.d("TAG", "LoctionService1: lat "+al.get("Latitude"));
-                        Log.d("TAG", "LoctionService1: long"+al.get("Longitude"));
-                        arrayLat[i]=al.get("Latitude");
-                        arrayLong[i]=al.get("Longitude");
-                        i++;
-                    }
-                }
-            }
-        });
-    }
-
-    public LoctionService() {
-
-
-    }
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -185,42 +125,46 @@ public class LoctionService extends Service {
                     mNotificationManager.notify((int) System.currentTimeMillis(),
                             mBuilder.build());
                 } else {
-                    if (arrayLong.length<=0)
+                    if (objectCount < arrayLat.length) {
 //                for (double v : arrayLat) {
 //                    Log.d("TAG", "onLocationResult lat: " + v);
 //                }
 //                for (double v : arrayLong) {
 //                    Log.d("TAG", "onLocationResult long: " + v);
 //                }
-                    Log.d("TAG", "onLocationResult: lat " + Arrays.toString(arrayLat));
-                    Log.d("TAG", "onLocationResult: long " + Arrays.toString(arrayLong));
+                        Log.d("TAG", "onLocationResult: lat " + Arrays.toString(arrayLat));
+                        Log.d("TAG", "onLocationResult: long " + Arrays.toString(arrayLong));
 
-                    float[] result = new float[1];
-                    prevDistance=curDistance;
-                    Location.distanceBetween(latitude, longitude, arrayLat[objectCount], arrayLong[objectCount], result);
-                    curDistance=result[0];
-                    calcDistance=curDistance-prevDistance;
-                    Log.d("TAG", "onLocationResult: calc Distance "+calcDistance);
-                    Log.d("TAG", "onLocationResult: result " +result[0]);
-                    Log.d("TAG", "Prev distance = "+prevDistance+" current distance = "+curDistance);
-                    if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
-                        if (result[0] <= threshold) {
+                        float[] result = new float[1];
+                        prevDistance = curDistance;
+                        Location.distanceBetween(latitude, longitude, arrayLat[objectCount], arrayLong[objectCount], result);
+                        curDistance = result[0];
+                        calcDistance = curDistance - prevDistance;
+                        Log.d("TAG", "onLocationResult: calc Distance " + calcDistance);
+                        Log.d("TAG", "onLocationResult: result " + result[0]);
+                        Log.d("TAG", "Prev distance = " + prevDistance + " current distance = " + curDistance);
+                        if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
+                            if (result[0] <= threshold) {
+                                initialDist1 = result[0];
+                                status[objectCount] = true;
+                                Log.d("TAG", "onLocationResult: TRUE");
+                                statusUpdate(true, objectCount, latitude, longitude, speed);
+                                objectCount++;
+                            }
+                        } else if (curDevCount >= maxAllowedDeviation) {
                             initialDist1 = result[0];
-                            status[objectCount] = true;
-                            statusUpdate();
+                            status[objectCount] = false;
+                            Log.d("TAG", "onLocationResult: FALSE");
+                            statusUpdate(false, objectCount, latitude, longitude, speed);
                             objectCount++;
-                        }
-                    } else if (curDevCount >= maxAllowedDeviation) {
-                        initialDist1 = result[0];
-                        status[objectCount] = false;
-                        objectCount++;
-                        curDevCount = 0;
+                            curDevCount = 0;
 
-                    } else if (result[0] > initialDist1 || calcDistance>0) {
-//                        initialDist1 = result[0];
-                        curDevCount += 1;
+                        } else if (result[0] > initialDist1) {
+                            initialDist1 = result[0];
+                            curDevCount += 1;
+                        }
+                        Log.d("TAG", "onLocationResult: Obj count " + objectCount);
                     }
-                    Log.d("TAG", "onLocationResult: Obj count "+objectCount);
                 }
 //            }
             }
@@ -250,12 +194,72 @@ public class LoctionService extends Service {
         }
     };
 
+    public LoctionService() {
 
-    void statusUpdate(){
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        track = new com.example.indianrailways.LocTracking.Track();
+        reff = FirebaseDatabase.getInstance().getReference();
+        fStore = FirebaseFirestore.getInstance();
+//        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
+//        CollectionReference applicationsRef = rootRef.collection("Tracking");
+//        DocumentReference applicationIdRef = applicationsRef.document("Duty1");
+//        applicationIdRef.get().addOnCompleteListener(task -> {
+//            if (task.isSuccessful()) {
+//                DocumentSnapshot document = task.getResult();
+//                HashMap<Object,ArrayList> hm= (HashMap<Object, ArrayList>) document.get("Patrolman1.Trips");
+//                assert hm != null;
+////                or(Object al: Objects.requireNonNull(hm.get("Trip1"))){
+//                int i=0;
+//                for(Object al: Objects.requireNonNull(hm.get("Trip1"))){
+////                    for (int al=0;al<=hm.get("Trip1").size();al++){
+//                    Log.d("TAG", "LoctionService: hii");
+//                    HashMap<Object,Double> al1= (HashMap<Object, Double>) al;
+//                    Log.d("TAG", "LoctionService: al = "+al1.get("Latitude"));
+//
+//                    arrayLat[i]= al1.get("Latitude");
+//                    i++;
+//                }
+//            }
+//        });
+
+
+        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
+        CollectionReference applicationsRef = rootRef.collection("Original Coordinates");
+        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
+        applicationIdRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    List<Map<String, Double>> users = (List<Map<String, Double>>) document.get("Aurangabad");
+                    int i = 0;
+                    assert users != null;
+                    for (Map<String, Double> al : users) {
+                        Log.d("TAG", "LoctionService1: lat " + al.get("Latitude"));
+                        Log.d("TAG", "LoctionService1: long" + al.get("Longitude"));
+                        arrayLat[i] = al.get("Latitude");
+                        arrayLong[i] = al.get("Longitude");
+                        i++;
+                    }
+                }
+            }
+        });
+    }
+
+    void statusUpdate(boolean status, int ind, double lat, double long1, double speed) {
         FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
         CollectionReference applicationsRef = rootRef.collection("Tracking");
         DocumentReference applicationIdRef = applicationsRef.document("Duty1");
-        applicationIdRef.update("Patrolman1.Trips.Trip2.Status",true).addOnCompleteListener(new OnCompleteListener<Void>() {
+        Log.d("TAG", "statusUpdate: index = " + ind);
+
+        applicationIdRef.update("Patrolman1.Trips.Trip1." + ind + ".Status", status,
+                "Patrolman1.Trips.Trip1." + ind + ".Latitude", lat,
+                "Patrolman1.Trips.Trip1." + ind + ".Longitude", long1,
+                "Patrolman1.Trips.Trip1." + ind + ".Speed", speed).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Log.d("TAG", "onComplete: SUCCESS");
@@ -263,9 +267,27 @@ public class LoctionService extends Service {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.d("TAG", "onFailure: "+e);
+                Log.d("TAG", "onFailure: " + e);
             }
         });
+//        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
+//        DocumentReference ref = rootRef.collection("Tracking").document("Duty1");
+//        Map<String, Object> availableProducts = new HashMap<>();
+//        Map<String, Object> trip = new HashMap<>();
+////        Map<String, Object> trip3 = new HashMap<>();
+//        ArrayList<Integer> trip3=new ArrayList<Integer>();
+//        Map<String, Object> values = new HashMap<>();
+//        Map<String, Object> zeroMap = new HashMap<>();
+//        Map<String, Object> product = new HashMap<>();
+//        product.put("Status", true);
+//        product.put("Speed", 2.3);
+//        zeroMap.put("0", product);
+//        availableProducts.put("Patrolman1", trip);
+//        trip.put("Trips", trip3);
+//        trip3.add(0);
+////        values.put("Status","true");
+//        Log.d("TAG", "statusUpdate: "+availableProducts.toString()+" "+trip.toString()+" "+trip3.toString()+" "+zeroMap+" "+product);
+//        ref.set(availableProducts, SetOptions.merge());
     }
 
     @Nullable
@@ -309,7 +331,7 @@ public class LoctionService extends Service {
             }
         }
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000); //1:6 60000
+        locationRequest.setInterval(20000); //1:6 60000
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
