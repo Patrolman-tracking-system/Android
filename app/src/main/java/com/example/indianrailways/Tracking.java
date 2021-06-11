@@ -161,21 +161,4 @@ public class Tracking extends AppCompatActivity {
             Toast.makeText(this, "Location Service Stopped", Toast.LENGTH_SHORT).show();
         }
     }
-//    public class CountDownTimerTest extends CountDownTimer {
-//        public CountDownTimerTest(long startTime, long interval) {
-//            super(startTime, interval);
-//        }
-//
-//        @Override
-//        public void onFinish() {
-//            timeElapsedView.setText("Time Elapsed: " + String.valueOf(startTime));
-//        }
-//
-//        @Override
-//        public void onTick(long millisUntilFinished) {
-//            timeElapsed = startTime - millisUntilFinished;
-//            timeElapsedView.setText("Time Elapsed: " + String.valueOf(timeElapsed));
-//        }
-//    }
-
 }
