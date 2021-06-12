@@ -3,8 +3,10 @@ package com.example.indianrailways;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.indianrailways.LocTracking.Constants;
 import com.example.indianrailways.LocTracking.LoctionService;
@@ -59,14 +62,16 @@ public class Tracking extends AppCompatActivity {
         }
         runTimer();
 
-//        LocalBroadcastManager.getInstance(this).registerReceiver(
-//                new BroadcastReceiver() {
-//                    @Override
-//                    public void onReceive(Context context, Intent intent) {
-//                        start.setEnabled(true);
-//                    }
-//                }, new IntentFilter(LoctionService.ACTION_LOCATION_BROADCAST)
-//        );
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+
+                        stop.setEnabled(true);
+
+                    }
+                }, new IntentFilter(LoctionService.ACTION_LOCATION_BROADCAST)
+        );
 
         findViewById(R.id.start).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,6 +82,7 @@ public class Tracking extends AppCompatActivity {
                     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     startActivity(intent);
                 }
+                stop.setEnabled(false);
                 running = true;
                 startLocationService();
             }

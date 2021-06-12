@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.indianrailways.R;
 import com.google.android.gms.location.LocationAvailability;
@@ -56,7 +57,7 @@ public class LoctionService extends Service {
     com.example.indianrailways.LocTracking.Track track;
     double initialDist1 = 11000;
     int maxAllowedDeviation = 3;
-    //    public static final String ACTION_LOCATION_BROADCAST = LoctionService.class.getName() + "LocationBroadcast";
+    public static final String ACTION_LOCATION_BROADCAST = LoctionService.class.getName() + "LocationBroadcast";
     long tripId = 0;
     int objectCount = 0;
     LocalTime dt;
@@ -131,6 +132,7 @@ public class LoctionService extends Service {
                         tripId++;
                         updateTID(tripId);
                         objectCount = 6;
+                        sendBroadcastMessage();
                     }
                     if (objectCount < arrayLat.length && tripId <= 4) {
 //                for (double v : arrayLat) {
@@ -418,44 +420,9 @@ public class LoctionService extends Service {
 
     }
 
-    private String convertLatitude(double latitude) {
-        StringBuilder builder = new StringBuilder();
-
-        if (latitude < 0) {
-            builder.append("S ");
-        } else {
-            builder.append("N ");
-        }
-
-        String latitudeDegrees = Location.convert(Math.abs(latitude), Location.FORMAT_SECONDS);
-        String[] latitudeSplit = latitudeDegrees.split(":");
-        builder.append(latitudeSplit[0]);
-        builder.append("°");
-        builder.append(latitudeSplit[1]);
-        builder.append("'");
-        builder.append(latitudeSplit[2]);
-        builder.append("\"");
-        return builder.toString();
-    }
-
-    private String convertLongitude(double longitude) {
-        StringBuilder builder = new StringBuilder();
-
-        if (longitude < 0) {
-            builder.append("W ");
-        } else {
-            builder.append("E ");
-        }
-
-        String longitudeDegrees = Location.convert(Math.abs(longitude), Location.FORMAT_SECONDS);
-        String[] longitudeSplit = longitudeDegrees.split(":");
-        builder.append(longitudeSplit[0]);
-        builder.append("°");
-        builder.append(longitudeSplit[1]);
-        builder.append("'");
-        builder.append(longitudeSplit[2]);
-        builder.append("\"");
-        return builder.toString();
+    private void sendBroadcastMessage() {
+        Intent intent = new Intent(ACTION_LOCATION_BROADCAST);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
 }
