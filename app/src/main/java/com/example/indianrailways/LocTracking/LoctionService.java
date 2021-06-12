@@ -36,7 +36,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -57,7 +56,8 @@ public class LoctionService extends Service {
     com.example.indianrailways.LocTracking.Track track;
     double initialDist1 = 11000;
     int maxAllowedDeviation = 3;
-    int tripId = 1;
+    //    public static final String ACTION_LOCATION_BROADCAST = LoctionService.class.getName() + "LocationBroadcast";
+    long tripId = 0;
     int objectCount = 0;
     LocalTime dt;
     double[] arrayLat = new double[5];
@@ -123,16 +123,15 @@ public class LoctionService extends Service {
                     mNotificationManager.notify((int) System.currentTimeMillis(),
                             mBuilder.build());
                 } else {
-                    if (objectCount >= arrayLat.length) {
-                        objectCount = 0;
-                        curDevCount = 0;
-                        initialDist1 = 11000;
-                        tripId++;
-                        status = new boolean[]{false, false, false, false, false};
+                    if (tripId % 2 != 0) {
                         reverseArray(arrayLat);
                         reverseArray(arrayLong);
                     }
-
+                    if (objectCount == 5) {
+                        tripId++;
+                        updateTID(tripId);
+                        objectCount = 6;
+                    }
                     if (objectCount < arrayLat.length && tripId <= 4) {
 //                for (double v : arrayLat) {
 //                    Log.d("TAG", "onLocationResult lat: " + v);
@@ -281,14 +280,46 @@ public class LoctionService extends Service {
                 }
             }
         });
+
+        CollectionReference applicationsRef1 = rootRef.collection("Tracking");
+        DocumentReference applicationIdRef1 = applicationsRef1.document("Duty1");
+        applicationIdRef1.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    Map<String, Object> data = document.getData();
+                    assert data != null;
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        if (entry.getKey().equals("Patrolman1")) {
+                            Map<String, Object> patrolman = (Map<String, Object>) entry.getValue();
+                            for (Map.Entry<String, Object> e : patrolman.entrySet()) {
+                                if (e.getKey().equals("Trips")) {
+                                    Map<String, Object> tid = (Map<String, Object>) e.getValue();
+                                    for (Map.Entry<String, Object> dataEntry : tid.entrySet()) {
+                                        if (dataEntry.getKey().equals("TripCount")) {
+                                            tripId = (Long) dataEntry.getValue();
+
+                                            Log.d("TAG", "TID : " + tripId);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+
     }
 
-    void statusUpdate(boolean status, int ind, double lat, double long1, double speed, LocalTime dt, int tID) {
+    void statusUpdate(boolean status, int ind, double lat, double long1, double speed, LocalTime dt, double tID) {
         FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
         CollectionReference applicationsRef = rootRef.collection("Tracking");
         DocumentReference applicationIdRef = applicationsRef.document("Duty1");
-//        Log.d("TAG", "statusUpdate: index = " + ind);
-        String trip = Integer.toString(tID);
+        int trip1 = (int) tID;
+        String trip = Integer.toString(trip1);
+
         applicationIdRef.update("Patrolman1.Trips.Trip" + trip + "." + ind + ".Status", status,
                 "Patrolman1.Trips.Trip" + trip + "." + ind + ".Latitude", lat,
                 "Patrolman1.Trips.Trip" + trip + "." + ind + ".Longitude", long1,
@@ -298,30 +329,20 @@ public class LoctionService extends Service {
             public void onComplete(@NonNull Task<Void> task) {
                 Log.d("TAG", "onComplete: SUCCESS");
             }
-        }).addOnFailureListener(new OnFailureListener() {
+        });
+    }
+
+    void updateTID(long id) {
+        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
+        CollectionReference applicationsRef = rootRef.collection("Tracking");
+        DocumentReference applicationIdRef = applicationsRef.document("Duty1");
+//        Log.d("TAG", "statusUpdate: index = " + ind);
+        applicationIdRef.update("Patrolman1.Trips.TripCount", id).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d("TAG", "onFailure: " + e);
+            public void onComplete(@NonNull Task<Void> task) {
+                Log.d("TAG", "onComplete: SUCCESS ID");
             }
         });
-//        FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
-//        DocumentReference ref = rootRef.collection("Tracking").document("Duty1");
-//        Map<String, Object> availableProducts = new HashMap<>();
-//        Map<String, Object> trip = new HashMap<>();
-////        Map<String, Object> trip3 = new HashMap<>();
-//        ArrayList<Integer> trip3=new ArrayList<Integer>();
-//        Map<String, Object> values = new HashMap<>();
-//        Map<String, Object> zeroMap = new HashMap<>();
-//        Map<String, Object> product = new HashMap<>();
-//        product.put("Status", true);
-//        product.put("Speed", 2.3);
-//        zeroMap.put("0", product);
-//        availableProducts.put("Patrolman1", trip);
-//        trip.put("Trips", trip3);
-//        trip3.add(0);
-////        values.put("Status","true");
-//        Log.d("TAG", "statusUpdate: "+availableProducts.toString()+" "+trip.toString()+" "+trip3.toString()+" "+zeroMap+" "+product);
-//        ref.set(availableProducts, SetOptions.merge());
     }
 
     @Nullable

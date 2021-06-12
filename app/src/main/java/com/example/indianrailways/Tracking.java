@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,12 +33,15 @@ public class Tracking extends AppCompatActivity {
     private boolean running;
 
     private boolean wasRunning;
+    Button start, stop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking);
         tv = findViewById(R.id.tv);
+        start = findViewById(R.id.start);
+        stop = findViewById(R.id.stop);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(Tracking.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
         }
@@ -54,6 +58,16 @@ public class Tracking extends AppCompatActivity {
                     .getBoolean("wasRunning");
         }
         runTimer();
+
+//        LocalBroadcastManager.getInstance(this).registerReceiver(
+//                new BroadcastReceiver() {
+//                    @Override
+//                    public void onReceive(Context context, Intent intent) {
+//                        start.setEnabled(true);
+//                    }
+//                }, new IntentFilter(LoctionService.ACTION_LOCATION_BROADCAST)
+//        );
+
         findViewById(R.id.start).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
