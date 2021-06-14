@@ -268,7 +268,7 @@ public class LoctionService extends Service {
 
         FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
         CollectionReference applicationsRef = rootRef.collection("Original Coordinates");
-        DocumentReference applicationIdRef = applicationsRef.document("Testing");
+        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
         applicationIdRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Log.d("TAG", "onCreate: yess");
