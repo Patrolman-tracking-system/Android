@@ -14,9 +14,11 @@ import android.graphics.PixelFormat;
 import android.location.Location;
 import android.media.AudioAttributes;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -55,7 +57,7 @@ public class LoctionService extends Service {
     DatabaseReference reff;
     FirebaseFirestore fStore;
     com.example.indianrailways.LocTracking.Track track;
-    double initialDist1 = 11000;
+    double initialDist1 = Double.MAX_VALUE;
     int maxAllowedDeviation = 3;
     public static final String ACTION_LOCATION_BROADCAST = LoctionService.class.getName() + "LocationBroadcast";
     long tripId = 0;
@@ -64,7 +66,7 @@ public class LoctionService extends Service {
     double[] arrayLat = new double[5];
     double[] arrayLong = new double[5];
     boolean[] status = new boolean[]{false, false, false, false, false};
-    double threshold = 500;
+    double threshold = 10;
     int curDevCount = 0;
     WindowManager windowManager2;
     WindowManager.LayoutParams params;
@@ -81,18 +83,19 @@ public class LoctionService extends Service {
                 double longitude = locationResult.getLastLocation().getLongitude();
                 double speed = locationResult.getLastLocation().getSpeed();
 //            if (lat!=latitude && long1!=longitude) {
-//                track.setLat(String.valueOf(latitude));
-//                track.setLong1(String.valueOf(longitude));
-//                track.setSped(String.valueOf(speed));
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    track.setSpeed2(String.valueOf(locationResult.getLastLocation().getSpeedAccuracyMetersPerSecond()));
-//                }
-//                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-//                String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-//                track.setId(ip);
-//                reff.push().setValue(track);
+                track.setLat(String.valueOf(latitude));
+                track.setLong1(String.valueOf(longitude));
+                track.setSped(String.valueOf(speed));
+                track.setObjCount(objectCount);
 
-                Toast.makeText(LoctionService.this, "speed" + locationResult.getLastLocation().getSpeed(), Toast.LENGTH_SHORT).show();
+                track.setdevCount(String.valueOf(curDevCount));
+
+                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                track.setId(ip);
+                reff.push().setValue(track);
+
+                Toast.makeText(LoctionService.this, "Lat = " + locationResult.getLastLocation().getLatitude() + " Long: " + locationResult.getLastLocation().getLongitude(), Toast.LENGTH_LONG).show();
                 lat = latitude;
                 long1 = longitude;
                 if (speed >= 2.5) {
@@ -153,11 +156,11 @@ public class LoctionService extends Service {
 //                        Log.d("TAG", "onLocationResult: result " + result[0]);
 //                        Log.d("TAG", "Prev distance = " + prevDistance + " current distance = " + curDistance);
                         Log.d("TAG", "onLocationResult: current dev = " + curDevCount);
-                        Log.d("TAG", "onLocationResult: current distance  = " + result[0]);
-                        Log.d("TAG", "onLocationResult: initial distance  = " + initialDist1);
+//                        Log.d("TAG", "onLocationResult: current distance  = " + result[0]);
+//                        Log.d("TAG", "onLocationResult: initial distance  = " + initialDist1);
                         if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
                             if (result[0] <= threshold) {
-                                initialDist1 = result[0];
+                                initialDist1 = Double.MAX_VALUE;
                                 status[objectCount] = true;
                                 curDevCount = 0;
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -170,7 +173,7 @@ public class LoctionService extends Service {
                                 initialDist1 = result[0];
                             }
                         } else if (curDevCount >= maxAllowedDeviation) {
-                            initialDist1 = result[0];
+                            initialDist1 = Double.MAX_VALUE;
                             status[objectCount] = false;
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 dt = LocalTime.now();
@@ -179,8 +182,9 @@ public class LoctionService extends Service {
                             statusUpdate(false, objectCount, latitude, longitude, speed, dt, tripId);
                             objectCount++;
                             curDevCount = 0;
-
-                        } else if (result[0] > initialDist1) {
+                        } else if (result[0] > initialDist1 && (result[0] - initialDist1) > 5) {
+                            Log.d("TAG", "onLocationResult: result " + result[0]);
+                            Log.d("TAG", "onLocationResult: init dist " + initialDist1);
                             initialDist1 = result[0];
                             curDevCount += 1;
                         }
@@ -264,17 +268,19 @@ public class LoctionService extends Service {
 
         FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
         CollectionReference applicationsRef = rootRef.collection("Original Coordinates");
-        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
+        DocumentReference applicationIdRef = applicationsRef.document("Testing");
         applicationIdRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                Log.d("TAG", "onCreate: yess");
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
+                    Log.d("TAG", "onCreate: yess2");
                     List<Map<String, Double>> users = (List<Map<String, Double>>) document.get("Aurangabad");
                     int i = 0;
                     assert users != null;
                     for (Map<String, Double> al : users) {
-//                        Log.d("TAG", "LoctionService1: lat " + al.get("Latitude"));
-//                        Log.d("TAG", "LoctionService1: long" + al.get("Longitude"));
+                        Log.d("TAG", "LoctionService1: lat " + al.get("Latitude"));
+                        Log.d("TAG", "LoctionService1: long" + al.get("Longitude"));
                         arrayLat[i] = al.get("Latitude");
                         arrayLong[i] = al.get("Longitude");
                         i++;
@@ -388,7 +394,7 @@ public class LoctionService extends Service {
             }
         }
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000); //1:6 60000 13000 20
+        locationRequest.setInterval(11000); //1:6 60000 13000 20
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;

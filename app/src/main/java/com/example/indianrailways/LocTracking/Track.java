@@ -3,14 +3,23 @@ package com.example.indianrailways.LocTracking;
 public class Track {
     private String lat, long1;
     private String id;
-    private String sped, speed2;
+    private String sped, devCount;
+    private int objCount;
 
-    public String getSpeed2() {
-        return speed2;
+    public int getObjCount() {
+        return objCount;
     }
 
-    public void setSpeed2(String speed2) {
-        this.speed2 = speed2;
+    public void setObjCount(int objCount) {
+        this.objCount = objCount;
+    }
+
+    public String getdevCount() {
+        return devCount;
+    }
+
+    public void setdevCount(String devCount) {
+        this.devCount = devCount;
     }
 
     public String getSped() {
