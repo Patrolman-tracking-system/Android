@@ -1,258 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
     android:clipToPadding="false"
     tools:context=".MainPage"
-    tools:ignore="UseCompoundDrawables">
+    tools:menu="@menu/bottom_nav_menu">
+
+    <include
+        android:id="@+id/inc_toolbar"
+        layout="@layout/toolbar" />
+
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+
+        android:layout_height="500dp"
+        android:layout_below="@id/inc_toolbar"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="40dp"
+        android:clipToPadding="false"
         android:orientation="vertical"
-        android:weightSum="2"
-        android:clipToPadding="false"
-        android:paddingBottom="50dp">
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp"
+        android:paddingBottom="50dp"
+        android:weightSum="2">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
+            android:id="@+id/startCard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="20dp"
-            android:clipToPadding="false"
-            android:orientation="horizontal">
-            <androidx.cardview.widget.CardView
-                android:id="@+id/track"
-                android:layout_width="160dp"
-                android:layout_height="150dp"
-                android:layout_marginStart="10dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="20dp"
+
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:elevation="50dp"
+            app:cardBackgroundColor="@color/green_start"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="6dp"
+            app:contentPadding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:layout_marginRight="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="60dp"
-                android:elevation="50dp"
-                android:layout_marginEnd="10dp">
+                android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/startText"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:text="@string/start_tracking"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
 
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
-                        android:contentDescription="@string/desc"
-                        android:src="@drawable/track" />
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/white" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_light"
-                        android:layout_marginTop="15dp"
-                        android:text="Start Tracking"
-                        android:textSize="15dp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Before starting trip press start button."
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/attendance"
-                android:layout_width="160dp"
-                android:elevation="50dp"
-                android:layout_height="150dp"
-                android:layout_marginLeft="10dp"
+                <Button
+                    android:id="@+id/startTrackingButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/start_tracking"
+                    android:textColor="@color/green_start"
+                    android:textSize="16dp"
+                    app:backgroundTint="#FFFFFF"
+                    app:cornerRadius="8dp"
+                    app:icon="@drawable/ic_play_icon"
+                    app:iconSize="40dp"
+                    app:iconTint="@color/green_start" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/stopCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:elevation="50dp"
+            app:cardBackgroundColor="@color/red_stop"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="6dp"
+            app:contentPadding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:layout_marginTop="60dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginStart="10dp">
-                <LinearLayout
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/stopText"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:text="@string/stop_tracking"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
 
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
-                        android:contentDescription="@string/desc"
-                        android:src="@drawable/attendance" />
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/white" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_light"
-                        android:layout_marginTop="15dp"
-                        android:text="Attendance"
-                        android:textSize="15dp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-        </LinearLayout>
-    <LinearLayout
+                <TextView
+                    android:id="@+id/stopTextDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="After reached to mid point press stop button."
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/stopTrackingButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/stop_tracking"
+                    android:textColor="@color/red_stop"
+                    android:textSize="16dp"
+                    app:backgroundTint="@color/white"
+                    app:cornerRadius="8dp"
+                    app:icon="@drawable/ic__stop_icon"
+                    app:iconSize="40dp"
+                    app:iconTint="@color/red_stop" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayout"
+        android:layout_centerInParent="true"
+        android:text="TextView"
+        android:textSize="24sp" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="2"
-        android:clipToPadding="false"
-        android:padding="10dp"
-        android:orientation="horizontal">
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cList"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_marginStart="20dp"
-                android:layout_weight="1"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
-                android:elevation="50dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+        android:layout_height="75dp"
 
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
-                        android:contentDescription="@string/desc"
-                        android:src="@drawable/contactlist" />
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav_menu" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_light"
-                        android:layout_marginTop="15dp"
-                        android:text="Contact List"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/reportIncident"
-                android:layout_width="160dp"
-                android:layout_height="150dp"
-                android:layout_marginTop="30dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="20dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="30dp"
-                android:elevation="50dp"
-                android:layout_marginStart="10dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
-                        android:contentDescription="@string/desc"
-                        android:src="@drawable/report" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_light"
-                        android:layout_marginTop="15dp"
-                        android:text="Report Incident"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-    </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:weightSum="2"
-            android:clipToPadding="false"
-            android:padding="10dp"
-            android:orientation="horizontal">
-            <androidx.cardview.widget.CardView
-                android:id="@+id/leaveApplication"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_marginStart="20dp"
-                android:layout_weight="1"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
-                android:elevation="50dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
-                        android:contentDescription="@string/desc"
-                        android:src="@drawable/leave" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_light"
-                        android:layout_marginTop="15dp"
-                        android:text="Leave Application"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/msg"
-                android:layout_width="160dp"
-                android:layout_height="150dp"
-                android:layout_marginTop="30dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="20dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="30dp"
-                android:elevation="50dp"
-                android:layout_marginStart="10dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
-                        android:contentDescription="@string/desc"
-                        android:src="@drawable/msg" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_light"
-                        android:layout_marginTop="15dp"
-                        android:text="Message"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+</RelativeLayout>
