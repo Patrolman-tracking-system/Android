@@ -35,7 +35,7 @@ public class Login extends AppCompatActivity {
         sharedpreferences = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
         String name = sharedpreferences.getString("Name", null);
         if (name != null) {
-            startActivity(new Intent(Login.this, com.example.indianrailways.MainPage.class));
+            startActivity(new Intent(Login.this, MainPage.class));
         }
         login.setOnClickListener(new LoginSuccess());
     }
@@ -43,7 +43,7 @@ public class Login extends AppCompatActivity {
     private class LoginSuccess implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            if(Objects.requireNonNull(iD.getText()).toString().equals("a") && Objects.requireNonNull(pass.getText()).toString().equals("a")) {
+            if(Objects.requireNonNull(iD.getText()).toString().equals("awb") && Objects.requireNonNull(pass.getText()).toString().equals("awb")) {
                 SharedPreferences.Editor editor = sharedpreferences.edit();
                 editor.putString("Name", iD.getText().toString());
                 editor.putString("Password", pass.getText().toString());
@@ -52,20 +52,20 @@ public class Login extends AppCompatActivity {
                 Intent intent = new Intent(Login.this, MainPage.class);
                 startActivity(intent);
             }
-            if(!iD.getText().toString().equals("a")){
+            if(!iD.getText().toString().equals("awb")){
                 Log.d("TAG", "onClick: ");
                 idEL.setError("Invalid User ID");
             }
-            if(iD.getText().toString().equals("a")){
+            if(iD.getText().toString().equals("awb")){
                 idEL.setError(null);
                 idEL.clearFocus();
                 passEL.requestFocus();
                 pass.setCursorVisible(true);
             }
-            if(!Objects.requireNonNull(pass.getText()).toString().equals("a")){
+            if(!Objects.requireNonNull(pass.getText()).toString().equals("awb")){
                 passEL.setError("Invalid Password");
             }
-            if(pass.getText().toString().equals("a")){
+            if(pass.getText().toString().equals("awb")){
                 passEL.setError(null);
             }
         }

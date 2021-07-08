@@ -42,14 +42,13 @@ public class MainPage extends AppCompatActivity {
 
 
     public static final int REQUEST_CODE_LOCATION_PERMISSION = 1;
-    TextView tv;
     private int seconds = 0;
 
     private boolean running;
 
     private boolean wasRunning;
-    CardView report,track;
     Button startTracking, stopTracking;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,12 +109,14 @@ public class MainPage extends AppCompatActivity {
                 startActivity(intent);
             }
             stopTracking.setEnabled(false);
+            Toast.makeText(this, "Patrolling Started", Toast.LENGTH_SHORT).show();
             running = true;
             startLocationService();
 
         });
 
         stopTracking.setOnClickListener(v -> {
+            Toast.makeText(this, "Patrolling Stopped", Toast.LENGTH_SHORT).show();
             running = false;
             stopLocationService();
         });
@@ -174,7 +175,7 @@ public class MainPage extends AppCompatActivity {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && grantResults.length > 0) {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startLocationService();
+//                    startLocationService();
                 } else {
                     Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
                 }

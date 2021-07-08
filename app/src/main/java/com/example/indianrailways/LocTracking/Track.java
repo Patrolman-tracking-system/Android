@@ -6,6 +6,26 @@ public class Track {
     private String sped, devCount;
     private int objCount;
 
+
+
+    public String getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(String current) {
+        this.current = current;
+    }
+
+    public String getInit() {
+        return init;
+    }
+
+    public void setInit(String init) {
+        this.init = init;
+    }
+
+    private String current, init;
+
     public int getObjCount() {
         return objCount;
     }
