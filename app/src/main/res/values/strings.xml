@@ -1,15 +1,15 @@
 <resources>
-    <string name="app_name">Indian Railway</string>
+    <string name="app_name">Steps Counter</string>
     <string name="desc">Imageview</string>
-    <string name="start_tracking">Start Patrolling</string>
+    <string name="start_tracking">Start</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
-    <string name="enter_id">Enter Petrolmen ID</string>
+    <string name="enter_id">Enter Patrolmen ID</string>
     <string name="enter_password">Enter Password</string>
     <string name="login">LOGIN</string>
     <string name="make_video">Make Video</string>
     <string name="record_audio">Record Audio</string>
     <string name="take_picture">Take Picture</string>
     <string name="type_message">Type Message</string>
-    <string name="stop_tracking">Stop Patrolling</string>
+    <string name="stop_tracking">Stop</string>
 </resources>

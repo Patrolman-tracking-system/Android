@@ -81,7 +81,7 @@ public class MainPage extends AppCompatActivity {
                     = savedInstanceState
                     .getBoolean("wasRunning");
         }
-        runTimer();
+//        runTimer();
 
 
 //        track=findViewById(R.id.track);
@@ -129,46 +129,46 @@ public class MainPage extends AppCompatActivity {
 ////        return true;
 ////
 ////    }
-        @Override
-        public void onSaveInstanceState(
-                @NonNull Bundle savedInstanceState) {
-            super.onSaveInstanceState(savedInstanceState);
-            savedInstanceState
-                    .putInt("seconds", seconds);
-            savedInstanceState
-                    .putBoolean("running", running);
-            savedInstanceState
-                    .putBoolean("wasRunning", wasRunning);
-        }
-        private void runTimer()
-        {
-            final TextView timeView
-                    = findViewById(
-                    R.id.tv);
-            final Handler handler
-                    = new Handler();
-
-            handler.post(new Runnable() {
-                @Override
-
-                public void run()
-                {
-                    int hours = seconds / 3600;
-                    int minutes = (seconds % 3600) / 60;
-                    int secs = seconds % 60;
-                    String time
-                            = String
-                            .format(Locale.getDefault(),
-                                    "%d:%02d:%02d", hours,
-                                    minutes, secs);
-                    timeView.setText(time);
-                    if (running) {
-                        seconds++;
-                    }
-                    handler.postDelayed(this, 1000);
-                }
-            });
-        }
+//        @Override
+//        public void onSaveInstanceState(
+//                @NonNull Bundle savedInstanceState) {
+//            super.onSaveInstanceState(savedInstanceState);
+//            savedInstanceState
+//                    .putInt("seconds", seconds);
+//            savedInstanceState
+//                    .putBoolean("running", running);
+//            savedInstanceState
+//                    .putBoolean("wasRunning", wasRunning);
+//        }
+//        private void runTimer()
+//        {
+//            final TextView timeView
+//                    = findViewById(
+//                    R.id.tv);
+//            final Handler handler
+//                    = new Handler();
+//
+//            handler.post(new Runnable() {
+//                @Override
+//
+//                public void run()
+//                {
+//                    int hours = seconds / 3600;
+//                    int minutes = (seconds % 3600) / 60;
+//                    int secs = seconds % 60;
+//                    String time
+//                            = String
+//                            .format(Locale.getDefault(),
+//                                    "%d:%02d:%02d", hours,
+//                                    minutes, secs);
+//                    timeView.setText(time);
+//                    if (running) {
+//                        seconds++;
+//                    }
+//                    handler.postDelayed(this, 1000);
+//                }
+//            });
+//        }
 
         @Override
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

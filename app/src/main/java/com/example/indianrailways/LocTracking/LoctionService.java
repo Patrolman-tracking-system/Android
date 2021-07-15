@@ -5,15 +5,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.location.Location;
-import android.media.AudioAttributes;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -24,7 +20,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,8 +61,10 @@ public class LoctionService extends Service {
     double[] arrayLat = new double[5];
     double[] arrayLong = new double[5];
     boolean[] status = new boolean[]{false, false, false, false, false};
-    double threshold = 20;
+    double threshold = 50;
     int curDevCount = 0;
+    int ll=0;
+    double l1,lo1;
     WindowManager windowManager2;
     WindowManager.LayoutParams params;
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
@@ -82,41 +79,47 @@ public class LoctionService extends Service {
                 double latitude = locationResult.getLastLocation().getLatitude();
                 double longitude = locationResult.getLastLocation().getLongitude();
                 double speed = locationResult.getLastLocation().getSpeed();
+                if(ll==0) {
+                     l1 = latitude;
+                     lo1 = longitude;
+                    ll=1;
+                }
 //            if (lat!=latitude && long1!=longitude) {
 
 
 //                Toast.makeText(LoctionService.this, "Lat = " + locationResult.getLastLocation().getLatitude() + " Long: " + locationResult.getLastLocation().getLongitude(), Toast.LENGTH_LONG).show();
                 lat = latitude;
                 long1 = longitude;
-                if (speed >= 2.5) {
-                    Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/raw/quite_impressed.mp3");
-                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(LoctionService.this, default_notification_channel_id)
-                            .setSmallIcon(R.drawable.warning)
-                            .setContentTitle("Alert")
-                            .setSound(sound)
-                            .setContentText("You are going too fast");
-                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                .setUsage(AudioAttributes.USAGE_ALARM)
-                                .build();
-                        int importance = NotificationManager.IMPORTANCE_HIGH;
-                        NotificationChannel notificationChannel = new
-                                NotificationChannel(NOTIFICATION_CHANNEL_ID, "NOTIFICATION_CHANNEL_NAME", importance);
-                        notificationChannel.enableLights(true);
-                        notificationChannel.setLightColor(Color.RED);
-                        notificationChannel.enableVibration(true);
-                        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-                        notificationChannel.setSound(sound, audioAttributes);
-                        mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID);
-                        assert mNotificationManager != null;
-                        mNotificationManager.createNotificationChannel(notificationChannel);
-                    }
-                    assert mNotificationManager != null;
-                    mNotificationManager.notify((int) System.currentTimeMillis(),
-                            mBuilder.build());
-                } else {
+//                if (speed >= 2.5) {
+//                    Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/raw/quite_impressed.mp3");
+//                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(LoctionService.this, default_notification_channel_id)
+//                            .setSmallIcon(R.drawable.warning)
+//                            .setContentTitle("Alert")
+//                            .setSound(sound)
+//                            .setContentText("You are going too fast");
+//                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+//                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+//                                .setUsage(AudioAttributes.USAGE_ALARM)
+//                                .build();
+//                        int importance = NotificationManager.IMPORTANCE_HIGH;
+//                        NotificationChannel notificationChannel = new
+//                                NotificationChannel(NOTIFICATION_CHANNEL_ID, "NOTIFICATION_CHANNEL_NAME", importance);
+//                        notificationChannel.enableLights(true);
+//                        notificationChannel.setLightColor(Color.RED);
+//                        notificationChannel.enableVibration(true);
+//                        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+//                        notificationChannel.setSound(sound, audioAttributes);
+//                        mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID);
+//                        assert mNotificationManager != null;
+//                        mNotificationManager.createNotificationChannel(notificationChannel);
+//                    }
+//                    assert mNotificationManager != null;
+//                    mNotificationManager.notify((int) System.currentTimeMillis(),
+//                            mBuilder.build());
+//                }
+//                else {
 //                    Log.d("TAG", "onLocationResult: true");
 
                     if (objectCount == 5) {
@@ -125,6 +128,7 @@ public class LoctionService extends Service {
                         objectCount = 6;
                         sendBroadcastMessage();
                     }
+
                     if (objectCount < arrayLat.length && tripId <= 4) {
 //                for (double v : arrayLat) {
 //                    Log.d("TAG", "onLocationResult lat: " + v);
@@ -132,31 +136,39 @@ public class LoctionService extends Service {
 //                for (double v : arrayLong) {
 //                    Log.d("TAG", "onLocationResult long: " + v);
 //                }
-//                        Log.d("TAG", "onLocationResult: lat " + Arrays.toString(arrayLat));
-//                        Log.d("TAG", "onLocationResult: long " + Arrays.toString(arrayLong));
+                        Log.d("TAG", "onLocationResult: lat " + Arrays.toString(arrayLat));
+                        Log.d("TAG", "onLocationResult: long " + Arrays.toString(arrayLong));
 
                         float[] result = new float[1];
 //                        prevDistance = curDistance;
                         Location.distanceBetween(latitude, longitude, arrayLat[objectCount], arrayLong[objectCount], result);
-                        track.setLat(String.valueOf(latitude));
-                        track.setLong1(String.valueOf(longitude));
-                        track.setSped(String.valueOf(speed));
-                        track.setObjCount(objectCount);
-                        track.setCurrent(String.valueOf(result[0]));
-                        track.setInit(String.valueOf(initialDist1));
-                        track.setdevCount(String.valueOf(curDevCount));
-                        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-                        track.setId(ip);
-                        reff.push().setValue(track);
+                        float[] ans = new float[1];
+//                        prevDistance = curDistance;
+                        Location.distanceBetween(latitude, longitude, l1, lo1, ans);
+//                        if(ans[0]>20){
+                            track.setLat(String.valueOf   (latitude));
+                            track.setLong1(String.valueOf(longitude));
+                            track.setSped(String.valueOf(speed));
+                            track.setObjCount(objectCount);
+                            track.setCurrent(String.valueOf(result[0]));
+                            track.setInit(String.valueOf(initialDist1));
+                            track.setdevCount(String.valueOf(curDevCount));
+                            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                            String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                            track.setId(ip);
+                            reff.push().setValue(track);
+                            ll=0;
+
+//                        }
+//
 //                        curDistance = result[0];
 //                        calcDistance = curDistance - prevDistance;
 //                        Log.d("TAG", "onLocationResult: calc Distance " + calcDistance);
                         Log.d("TAG", "onLocationResult: result " + result[0]);
 //                        Log.d("TAG", "Prev distance = " + prevDistance + " current distance = " + curDistance);
-                        Log.d("TAG", "onLocationResult: current dev = " + curDevCount);
-//                        Log.d("TAG", "onLocationResult: current distance  = " + result[0]);
-//                        Log.d("TAG", "onLocationResult: initial distance  = " + initialDist1);
+//                        Log.d("TAG", "onLocationResult: current dev = " + curDevCount);
+////                        Log.d("TAG", "onLocationResult: current distance  = " + result[0]);
+////                        Log.d("TAG", "onLocationResult: initial distance  = " + initialDist1);
                         if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
                             if (result[0] <= threshold) {
                                 initialDist1 = Double.MAX_VALUE;
@@ -182,8 +194,8 @@ public class LoctionService extends Service {
                             objectCount++;
                             curDevCount = 0;
                         } else if (result[0] > initialDist1 && (result[0] - initialDist1) > 20) {
-                            Log.d("TAG", "onLocationResult: result " + result[0]);
-                            Log.d("TAG", "onLocationResult: init dist " + initialDist1);
+//                            Log.d("TAG", "onLocationResult: result " + result[0]);
+//                            Log.d("TAG", "onLocationResult: init dist " + initialDist1);
 //                            Toast.makeText(LoctionService.this, "Current distance: " + result[0] + " Init Dist: " + initialDist1, Toast.LENGTH_SHORT).show();
                             initialDist1 = result[0];
                             curDevCount += 1;
@@ -191,7 +203,7 @@ public class LoctionService extends Service {
 
                         Log.d("TAG", "onLocationResult: Obj count " + objectCount);
                     }
-                }
+//                }
 //            }
             }
             Log.d("TAG", "onLocationResult: status"+Arrays.toString(status));
@@ -247,7 +259,7 @@ public class LoctionService extends Service {
         FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
         CollectionReference applicationsRef = rootRef.collection("Original Coordinates");
 //        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
-        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
+        DocumentReference applicationIdRef = applicationsRef.document("Testing");
         applicationIdRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
