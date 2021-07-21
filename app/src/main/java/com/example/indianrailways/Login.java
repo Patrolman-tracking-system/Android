@@ -49,8 +49,7 @@ public class Login extends AppCompatActivity {
                 editor.putString("Password", pass.getText().toString());
                 editor.apply();
                 Toast.makeText(Login.this, "Successfully Logged-in", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(Login.this, MainPage.class);
-                startActivity(intent);
+                startActivity(new Intent(Login.this, MainPage.class));
             }
             if(!iD.getText().toString().equals("awb")){
                 Log.d("TAG", "onClick: ");

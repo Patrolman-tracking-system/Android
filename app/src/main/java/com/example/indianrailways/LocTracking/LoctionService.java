@@ -1,15 +1,18 @@
-package com.example.indianrailways.LocTracking;
+    package com.example.indianrailways.LocTracking;
 
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.location.Location;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -20,6 +23,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,6 +50,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoctionService extends Service {
     double lat = 0, long1 = 0;
@@ -56,14 +61,14 @@ public class LoctionService extends Service {
     int maxAllowedDeviation = 3;
     public static final String ACTION_LOCATION_BROADCAST = LoctionService.class.getName() + "LocationBroadcast";
     long tripId = 0;
-    int objectCount = 0;
+    public int objectCount = 0;
     LocalTime dt;
     double[] arrayLat = new double[5];
     double[] arrayLong = new double[5];
     boolean[] status = new boolean[]{false, false, false, false, false};
     double threshold = 50;
-    int curDevCount = 0;
-    int ll=0;
+    int curDevCount = 0,ll=0;
+    String s="0";
     double l1,lo1;
     WindowManager windowManager2;
     WindowManager.LayoutParams params;
@@ -75,6 +80,7 @@ public class LoctionService extends Service {
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
             if(arrayLat[0]!=0.0 && arrayLong[0]!=0.0) {
+                Toast.makeText(LoctionService.this, "Hello", Toast.LENGTH_SHORT).show();
                 locationResult.getLastLocation();
                 double latitude = locationResult.getLastLocation().getLatitude();
                 double longitude = locationResult.getLastLocation().getLongitude();
@@ -91,33 +97,7 @@ public class LoctionService extends Service {
                 lat = latitude;
                 long1 = longitude;
 //                if (speed >= 2.5) {
-//                    Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/raw/quite_impressed.mp3");
-//                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(LoctionService.this, default_notification_channel_id)
-//                            .setSmallIcon(R.drawable.warning)
-//                            .setContentTitle("Alert")
-//                            .setSound(sound)
-//                            .setContentText("You are going too fast");
-//                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-//                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-//                                .setUsage(AudioAttributes.USAGE_ALARM)
-//                                .build();
-//                        int importance = NotificationManager.IMPORTANCE_HIGH;
-//                        NotificationChannel notificationChannel = new
-//                                NotificationChannel(NOTIFICATION_CHANNEL_ID, "NOTIFICATION_CHANNEL_NAME", importance);
-//                        notificationChannel.enableLights(true);
-//                        notificationChannel.setLightColor(Color.RED);
-//                        notificationChannel.enableVibration(true);
-//                        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-//                        notificationChannel.setSound(sound, audioAttributes);
-//                        mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID);
-//                        assert mNotificationManager != null;
-//                        mNotificationManager.createNotificationChannel(notificationChannel);
-//                    }
-//                    assert mNotificationManager != null;
-//                    mNotificationManager.notify((int) System.currentTimeMillis(),
-//                            mBuilder.build());
+//                    speedCheck();
 //                }
 //                else {
 //                    Log.d("TAG", "onLocationResult: true");
@@ -126,49 +106,26 @@ public class LoctionService extends Service {
                         tripId++;
                         updateTID(tripId);
                         objectCount = 6;
+                        changeObjCount(0);
                         sendBroadcastMessage();
                     }
 
                     if (objectCount < arrayLat.length && tripId <= 4) {
-//                for (double v : arrayLat) {
-//                    Log.d("TAG", "onLocationResult lat: " + v);
-//                }
-//                for (double v : arrayLong) {
-//                    Log.d("TAG", "onLocationResult long: " + v);
-//                }
+                        if(objectCount==0){
+                            Log.d("TAG", "onLocationResult: check");
+                            checkObjCount(1);
+                        }
                         Log.d("TAG", "onLocationResult: lat " + Arrays.toString(arrayLat));
                         Log.d("TAG", "onLocationResult: long " + Arrays.toString(arrayLong));
 
                         float[] result = new float[1];
-//                        prevDistance = curDistance;
                         Location.distanceBetween(latitude, longitude, arrayLat[objectCount], arrayLong[objectCount], result);
                         float[] ans = new float[1];
-//                        prevDistance = curDistance;
                         Location.distanceBetween(latitude, longitude, l1, lo1, ans);
-//                        if(ans[0]>20){
-                            track.setLat(String.valueOf   (latitude));
-                            track.setLong1(String.valueOf(longitude));
-                            track.setSped(String.valueOf(speed));
-                            track.setObjCount(objectCount);
-                            track.setCurrent(String.valueOf(result[0]));
-                            track.setInit(String.valueOf(initialDist1));
-                            track.setdevCount(String.valueOf(curDevCount));
-                            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                            String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-                            track.setId(ip);
-                            reff.push().setValue(track);
-                            ll=0;
-
-//                        }
-//
-//                        curDistance = result[0];
-//                        calcDistance = curDistance - prevDistance;
-//                        Log.d("TAG", "onLocationResult: calc Distance " + calcDistance);
+                        if(ans[0]>20){
+                            addDataInRealtime(latitude, longitude, speed, result[0]);
+                        }
                         Log.d("TAG", "onLocationResult: result " + result[0]);
-//                        Log.d("TAG", "Prev distance = " + prevDistance + " current distance = " + curDistance);
-//                        Log.d("TAG", "onLocationResult: current dev = " + curDevCount);
-////                        Log.d("TAG", "onLocationResult: current distance  = " + result[0]);
-////                        Log.d("TAG", "onLocationResult: initial distance  = " + initialDist1);
                         if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
                             if (result[0] <= threshold) {
                                 initialDist1 = Double.MAX_VALUE;
@@ -177,9 +134,12 @@ public class LoctionService extends Service {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                     dt = LocalTime.now();
                                 }
-//                                Log.d("TAG", "onLocationResult: TRUE");
+                                Log.d("TAG", "onLocationResult: objcount "+objectCount);
                                 statusUpdate(true, objectCount, latitude, longitude, speed, dt, tripId);
                                 objectCount++;
+                                Log.d("TAG", "onLocationResult: change obj ct: "+objectCount);
+                                changeObjCount(objectCount);
+                                Log.d("TAG", "onLocationResult: change obj ct after : "+objectCount);
                             } else {
                                 initialDist1 = result[0];
                             }
@@ -189,14 +149,15 @@ public class LoctionService extends Service {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 dt = LocalTime.now();
                             }
-//                            Log.d("TAG", "onLocationResult: FALSE");
+                            Log.d("TAG", "onLocationResult: objcount "+objectCount);
                             statusUpdate(false, objectCount, latitude, longitude, speed, dt, tripId);
                             objectCount++;
+
+                            changeObjCount(objectCount);
                             curDevCount = 0;
                         } else if (result[0] > initialDist1 && (result[0] - initialDist1) > 20) {
 //                            Log.d("TAG", "onLocationResult: result " + result[0]);
 //                            Log.d("TAG", "onLocationResult: init dist " + initialDist1);
-//                            Toast.makeText(LoctionService.this, "Current distance: " + result[0] + " Init Dist: " + initialDist1, Toast.LENGTH_SHORT).show();
                             initialDist1 = result[0];
                             curDevCount += 1;
                         }
@@ -207,6 +168,7 @@ public class LoctionService extends Service {
 //            }
             }
             Log.d("TAG", "onLocationResult: status"+Arrays.toString(status));
+            Log.d("TAG", "onLocationResult: obj count out "+objectCount);
         }
         private void showCustomPopupMenu()
         {
@@ -232,6 +194,85 @@ public class LoctionService extends Service {
         }
     };
 
+    private void addDataInRealtime(double latitude, double longitude, double speed, float f) {
+        track.setLat(String.valueOf   (latitude));
+        track.setLong1(String.valueOf(longitude));
+        track.setSped(String.valueOf(speed));
+        track.setObjCount(objectCount);
+        track.setCurrent(String.valueOf(f));
+        track.setInit(String.valueOf(initialDist1));
+        track.setdevCount(String.valueOf(curDevCount));
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        track.setId(ip);
+        reff.push().setValue(track);
+        ll=0;
+    }
+
+    private void speedCheck() {
+        Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/raw/quite_impressed.mp3");
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(LoctionService.this, default_notification_channel_id)
+                .setSmallIcon(R.drawable.warning)
+                .setContentTitle("Alert")
+                .setSound(sound)
+                .setContentText("You are going too fast");
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build();
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel = new
+                    NotificationChannel(NOTIFICATION_CHANNEL_ID, "NOTIFICATION_CHANNEL_NAME", importance);
+            notificationChannel.enableLights(true);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+            notificationChannel.setSound(sound, audioAttributes);
+            mBuilder.setChannelId(NOTIFICATION_CHANNEL_ID);
+            assert mNotificationManager != null;
+            mNotificationManager.createNotificationChannel(notificationChannel);
+        }
+        assert mNotificationManager != null;
+        mNotificationManager.notify((int) System.currentTimeMillis(),
+                mBuilder.build());
+    }
+
+    private int checkObjCount(int flag) {
+        track = new Track();
+        reff = FirebaseDatabase.getInstance().getReference();
+        fStore = FirebaseFirestore.getInstance();
+
+        FirebaseFirestore rootRef1 = FirebaseFirestore.getInstance();
+        CollectionReference applicationsRef = rootRef1.collection("Tracking");
+        DocumentReference applicationIdRef = applicationsRef.document("Duty1");
+        applicationIdRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    Map<String, Object> data = document.getData();
+                    assert data != null;
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        if (entry.getKey().equals("ObjectCount")) {
+                            Map<String, Long> patrolman = (Map<String, Long>) entry.getValue();
+                            for (Map.Entry<String, Long> dataEntry : patrolman.entrySet()) {
+                                if (dataEntry.getKey().equals("P1")) {
+                                    s =(Long.toString(dataEntry.getValue()));
+                                    Log.d("TAG", "checkObjCount: val s11: "+ s);
+                                    if(flag==1) {
+                                        objectCount = Integer.parseInt(s);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        return Integer.parseInt(s);
+    }
+
     public LoctionService() {
 
 
@@ -252,7 +293,48 @@ public class LoctionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        track = new com.example.indianrailways.LocTracking.Track();
+        FirebaseFirestore rootRef = getLatLongArray();
+
+        getTripCount(rootRef);
+        changeObjCount(checkObjCount(1));
+
+    }
+
+    private void changeObjCount(int no) {
+        track = new Track();
+        reff = FirebaseDatabase.getInstance().getReference();
+        fStore = FirebaseFirestore.getInstance();
+        Log.d("TAG", " IN changeObjCount: "+no);
+        FirebaseFirestore rootRef1 = FirebaseFirestore.getInstance();
+        CollectionReference applicationsRef = rootRef1.collection("Tracking");
+        DocumentReference applicationIdRef = applicationsRef.document("Duty1");
+        applicationIdRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    Log.d("TAG", "changeObjCount: Doc exist "+checkObjCount(0)+" obj c: "+objectCount);
+                    Map<String, Object> data = document.getData();
+                    assert data != null;
+                    if(data.get("ObjectCount")==null){
+                        Log.d("TAG", "changeObjCount: if1");
+                        applicationIdRef.update("ObjectCount.P1",0);
+                    }
+                       else if(checkObjCount(0)>=5 || (checkObjCount(0)==0) && checkObjCount(0)!=0){
+                            Log.d("TAG", "changeObjCount: if3: "+checkObjCount(0));
+                            applicationIdRef.update("ObjectCount.P1", 0);
+
+                    }
+                    else if(checkObjCount(0)>=0 && objectCount>=0) {
+                        Log.d("TAG", "changeObjCount: if2: "+checkObjCount(0));
+                        applicationIdRef.update("ObjectCount.P1", objectCount);
+                    }
+                }
+            }
+        });
+    }
+
+    private FirebaseFirestore getLatLongArray() {
+        track = new Track();
         reff = FirebaseDatabase.getInstance().getReference();
         fStore = FirebaseFirestore.getInstance();
 
@@ -275,9 +357,12 @@ public class LoctionService extends Service {
                 }
             }
         });
+        return rootRef;
+    }
 
+    private void getTripCount(FirebaseFirestore rootRef) {
         CollectionReference applicationsRef1 = rootRef.collection("Tracking");
-            DocumentReference applicationIdRef1 = applicationsRef1.document("Duty1");
+        DocumentReference applicationIdRef1 = applicationsRef1.document("Duty1");
         applicationIdRef1.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
@@ -307,7 +392,6 @@ public class LoctionService extends Service {
                 }
             }
         });
-
     }
 
     void statusUpdate(boolean status, int ind, double lat, double long1, double speed, LocalTime dt, double tID) {

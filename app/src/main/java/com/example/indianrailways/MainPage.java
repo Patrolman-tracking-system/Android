@@ -22,9 +22,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -35,6 +37,9 @@ import com.example.indianrailways.LocTracking.Constants;
 import com.example.indianrailways.LocTracking.LoctionService;
 
 import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.example.indianrailways.Tracking.REQUEST_CODE_LOCATION_PERMISSION;
 
@@ -100,19 +105,8 @@ public class MainPage extends AppCompatActivity {
                 }, new IntentFilter(LoctionService.ACTION_LOCATION_BROADCAST)
         );
 
-
         startTracking.setOnClickListener(v -> {
-            LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
-            boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !enabled) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-            stopTracking.setEnabled(false);
-            Toast.makeText(this, "Patrolling Started", Toast.LENGTH_SHORT).show();
-            running = true;
-            startLocationService();
-
+            locService();
         });
 
         stopTracking.setOnClickListener(v -> {
@@ -121,6 +115,19 @@ public class MainPage extends AppCompatActivity {
             stopLocationService();
         });
 
+    }
+
+    private void locService() {
+        LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !enabled) {
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);
+        }
+        stopTracking.setEnabled(false);
+        Toast.makeText(this, "Patrolling Started", Toast.LENGTH_SHORT).show();
+        running = true;
+        startLocationService();
     }
 //
 //    @Override
@@ -223,6 +230,10 @@ public class MainPage extends AppCompatActivity {
 
                 Intent intent = new Intent(getApplicationContext(), LoctionService.class);
                 intent.setAction(Constants.ACTION_START_LOCATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Log.d("TAG", "startLocationService: Foreground");
+                    startForegroundService(intent);
+                }
                 startService(intent);
                 Toast.makeText(this, "Location Service Started", Toast.LENGTH_SHORT).show();
             }
