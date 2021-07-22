@@ -122,9 +122,9 @@ public class LoctionService extends Service {
                         Location.distanceBetween(latitude, longitude, arrayLat[objectCount], arrayLong[objectCount], result);
                         float[] ans = new float[1];
                         Location.distanceBetween(latitude, longitude, l1, lo1, ans);
-                        if(ans[0]>20){
+//                        if(ans[0]>20){
                             addDataInRealtime(latitude, longitude, speed, result[0]);
-                        }
+//                        }
                         Log.d("TAG", "onLocationResult: result " + result[0]);
                         if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
                             if (result[0] <= threshold) {
@@ -312,21 +312,18 @@ public class LoctionService extends Service {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
-                    Log.d("TAG", "changeObjCount: Doc exist "+checkObjCount(0)+" obj c: "+objectCount);
+                    Log.d("TAG", "changeObjCount: Doc exist "+checkObjCount(0)+" obj c: "+no);
                     Map<String, Object> data = document.getData();
                     assert data != null;
                     if(data.get("ObjectCount")==null){
-                        Log.d("TAG", "changeObjCount: if1");
                         applicationIdRef.update("ObjectCount.P1",0);
                     }
-                       else if(checkObjCount(0)>=5 || (checkObjCount(0)==0) && checkObjCount(0)!=0){
-                            Log.d("TAG", "changeObjCount: if3: "+checkObjCount(0));
-                            applicationIdRef.update("ObjectCount.P1", 0);
+                    else if(checkObjCount(0)>=5 || (checkObjCount(0)==0) && checkObjCount(0)!=0){
+                        applicationIdRef.update("ObjectCount.P1", 0);
 
                     }
-                    else if(checkObjCount(0)>=0 && objectCount>=0) {
-                        Log.d("TAG", "changeObjCount: if2: "+checkObjCount(0));
-                        applicationIdRef.update("ObjectCount.P1", objectCount);
+                    else if(checkObjCount(0)>=0 && no>=0) {
+                        applicationIdRef.update("ObjectCount.P1", no);
                     }
                 }
             }

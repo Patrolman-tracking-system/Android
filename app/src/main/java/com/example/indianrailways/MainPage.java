@@ -25,6 +25,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -53,6 +54,7 @@ public class MainPage extends AppCompatActivity {
 
     private boolean wasRunning;
     Button startTracking, stopTracking;
+    PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,9 @@ public class MainPage extends AppCompatActivity {
         setContentView(R.layout.activity_main_page);
 
             Toolbar toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+                setSupportActionBar(toolbar);
+            }
 
 
 //        ActionBar actionBar;
@@ -225,25 +229,44 @@ public class MainPage extends AppCompatActivity {
             return false;
         }
 
-        private void startLocationService() {
-            if (!isLocationServiceRunning()) {
+    private void startLocationService() {
+        if (!isLocationServiceRunning()) {
 
-                Intent intent = new Intent(getApplicationContext(), LoctionService.class);
-                intent.setAction(Constants.ACTION_START_LOCATION_SERVICE);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Log.d("TAG", "startLocationService: Foreground");
-                    startForegroundService(intent);
-                }
-                startService(intent);
-                Toast.makeText(this, "Location Service Started", Toast.LENGTH_SHORT).show();
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag");
+            wakeLock.acquire(10*60*1000L /*10 minutes*/);
+
+            Intent intent = new Intent(getApplicationContext(), LoctionService.class);
+            intent.setAction(Constants.ACTION_START_LOCATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Log.d("TAG", "startLocationService: Foreground");
+                startForegroundService(intent);
             }
+            startService(intent);
+
+//                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//                WakeLock cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "gps_service");
+//                cpuWakeLock.acquire();
+
+
+
+            Toast.makeText(this, "Location Service Started", Toast.LENGTH_SHORT).show();
         }
+    }
 
 
     private void stopLocationService() {
         if (isLocationServiceRunning()) {
             Intent intent = new Intent(getApplicationContext(), LoctionService.class);
             intent.setAction(Constants.ACTION_STOP_LOCATION_SERVICE);
+
+
+            if(wakeLock.isHeld())
+                wakeLock.release();
+
+
             startService(intent);
             Toast.makeText(this, "Location Service Stopped", Toast.LENGTH_SHORT).show();
         }
