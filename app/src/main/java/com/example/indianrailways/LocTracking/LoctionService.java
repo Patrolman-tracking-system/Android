@@ -86,6 +86,7 @@ public class LoctionService extends Service {
                 double longitude = locationResult.getLastLocation().getLongitude();
                 double speed = locationResult.getLastLocation().getSpeed();
                 if(ll==0) {
+                    addDataInRealtime(latitude,longitude,speed,0);
                      l1 = latitude;
                      lo1 = longitude;
                     ll=1;
@@ -112,7 +113,6 @@ public class LoctionService extends Service {
 
                     if (objectCount < arrayLat.length && tripId <= 4) {
                         if(objectCount==0){
-                            Log.d("TAG", "onLocationResult: check");
                             checkObjCount(1);
                         }
                         Log.d("TAG", "onLocationResult: lat " + Arrays.toString(arrayLat));
@@ -122,10 +122,9 @@ public class LoctionService extends Service {
                         Location.distanceBetween(latitude, longitude, arrayLat[objectCount], arrayLong[objectCount], result);
                         float[] ans = new float[1];
                         Location.distanceBetween(latitude, longitude, l1, lo1, ans);
-//                        if(ans[0]>20){
+                        if(ans[0]>20){
                             addDataInRealtime(latitude, longitude, speed, result[0]);
-//                        }
-                        Log.d("TAG", "onLocationResult: result " + result[0]);
+                        }
                         if (result[0] < initialDist1 && curDevCount < maxAllowedDeviation) {
                             if (result[0] <= threshold) {
                                 initialDist1 = Double.MAX_VALUE;
@@ -134,12 +133,9 @@ public class LoctionService extends Service {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                     dt = LocalTime.now();
                                 }
-                                Log.d("TAG", "onLocationResult: objcount "+objectCount);
                                 statusUpdate(true, objectCount, latitude, longitude, speed, dt, tripId);
                                 objectCount++;
-                                Log.d("TAG", "onLocationResult: change obj ct: "+objectCount);
                                 changeObjCount(objectCount);
-                                Log.d("TAG", "onLocationResult: change obj ct after : "+objectCount);
                             } else {
                                 initialDist1 = result[0];
                             }
@@ -149,43 +145,22 @@ public class LoctionService extends Service {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 dt = LocalTime.now();
                             }
-                            Log.d("TAG", "onLocationResult: objcount "+objectCount);
                             statusUpdate(false, objectCount, latitude, longitude, speed, dt, tripId);
                             objectCount++;
 
                             changeObjCount(objectCount);
                             curDevCount = 0;
-                        } else if (result[0] > initialDist1 && (result[0] - initialDist1) > 20) {
+                        } else if (result[0] > initialDist1 && ans[0] > 20) {
 //                            Log.d("TAG", "onLocationResult: result " + result[0]);
 //                            Log.d("TAG", "onLocationResult: init dist " + initialDist1);
                             initialDist1 = result[0];
                             curDevCount += 1;
                         }
 
-                        Log.d("TAG", "onLocationResult: Obj count " + objectCount);
                     }
 //                }
 //            }
             }
-            Log.d("TAG", "onLocationResult: status"+Arrays.toString(status));
-            Log.d("TAG", "onLocationResult: obj count out "+objectCount);
-        }
-        private void showCustomPopupMenu()
-        {
-            windowManager2 = (WindowManager)getSystemService(WINDOW_SERVICE);
-            LayoutInflater layoutInflater=(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View view=layoutInflater.inflate(R.layout.activity_tracking, null);
-            params=new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_PHONE,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT);
-
-            params.gravity= Gravity.CENTER;
-            params.x = 0;
-            params.y = 0;
-            windowManager2.addView(view, params);
         }
 
         @Override
@@ -334,11 +309,10 @@ public class LoctionService extends Service {
         track = new Track();
         reff = FirebaseDatabase.getInstance().getReference();
         fStore = FirebaseFirestore.getInstance();
-
         FirebaseFirestore rootRef = FirebaseFirestore.getInstance();
         CollectionReference applicationsRef = rootRef.collection("Original Coordinates");
-//        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
-        DocumentReference applicationIdRef = applicationsRef.document("Testing");
+        DocumentReference applicationIdRef = applicationsRef.document("Station pair1");
+//        DocumentReference applicationIdRef = applicationsRef.document("Testing");
         applicationIdRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();

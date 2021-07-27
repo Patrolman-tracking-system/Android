@@ -47,7 +47,8 @@ import static com.example.indianrailways.Tracking.REQUEST_CODE_LOCATION_PERMISSI
 public class MainPage extends AppCompatActivity {
 
 
-    public static final int REQUEST_CODE_LOCATION_PERMISSION = 1;
+//    public static final int REQUEST_CODE_LOCATION_PERMISSION = 1;
+    public static int REQUEST_PERMISSION=1;
     private int seconds = 0;
 
     private boolean running;
@@ -114,11 +115,10 @@ public class MainPage extends AppCompatActivity {
         });
 
         stopTracking.setOnClickListener(v -> {
-            Toast.makeText(this, "Patrolling Stopped", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Step counting stopped", Toast.LENGTH_SHORT).show();
             running = false;
             stopLocationService();
         });
-
     }
 
     private void locService() {
@@ -129,7 +129,7 @@ public class MainPage extends AppCompatActivity {
             startActivity(intent);
         }
         stopTracking.setEnabled(false);
-        Toast.makeText(this, "Patrolling Started", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Steps Counting Started", Toast.LENGTH_SHORT).show();
         running = true;
         startLocationService();
     }
@@ -184,11 +184,17 @@ public class MainPage extends AppCompatActivity {
         @Override
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && grantResults.length > 0) {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    startLocationService();
+            if (requestCode == REQUEST_PERMISSION) {
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission accepted", Toast.LENGTH_SHORT).show();
+
+
                 } else {
-                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+//                    permission_fn();
+
                 }
             }
         }
@@ -231,11 +237,10 @@ public class MainPage extends AppCompatActivity {
 
     private void startLocationService() {
         if (!isLocationServiceRunning()) {
-
-            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    "MyApp::MyWakelockTag");
-            wakeLock.acquire(10*60*1000L /*10 minutes*/);
+//            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+//            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+//                    "MyApp::MyWakelockTag");
+//            wakeLock.acquire(10*60*1000L /*10 minutes*/);
 
             Intent intent = new Intent(getApplicationContext(), LoctionService.class);
             intent.setAction(Constants.ACTION_START_LOCATION_SERVICE);
@@ -244,14 +249,12 @@ public class MainPage extends AppCompatActivity {
                 Log.d("TAG", "startLocationService: Foreground");
                 startForegroundService(intent);
             }
-            startService(intent);
-
+            else {
+                startService(intent);
+            }
 //                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 //                WakeLock cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "gps_service");
 //                cpuWakeLock.acquire();
-
-
-
             Toast.makeText(this, "Location Service Started", Toast.LENGTH_SHORT).show();
         }
     }
@@ -262,9 +265,9 @@ public class MainPage extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), LoctionService.class);
             intent.setAction(Constants.ACTION_STOP_LOCATION_SERVICE);
 
-
-            if(wakeLock.isHeld())
-                wakeLock.release();
+//
+//            if(wakeLock.isHeld())
+//                wakeLock.release();
 
 
             startService(intent);
