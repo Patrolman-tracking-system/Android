@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import android.os.Build;
@@ -20,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
+import com.example.newrailways.APIdata.LocationPojo;
 import com.example.newrailways.APIdata.PostLocationData;
 import com.example.newrailways.R;
 import com.google.android.gms.location.LocationCallback;
@@ -27,9 +29,16 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-import java.util.Arrays;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
+
 
 public class LocationService extends Service {
+    LocationPojo data=new LocationPojo();
+    public static final String MyPREFERENCES = "UserDetails";
+    SharedPreferences sharedpreferences;
+    String userID="";
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -37,8 +46,13 @@ public class LocationService extends Service {
             locationResult.getLastLocation();
             double latitude = locationResult.getLastLocation().getLatitude();
             double longitude = locationResult.getLastLocation().getLongitude();
+            double speed=locationResult.getLastLocation().getSpeed();
+            data.setlatitude(String.valueOf(latitude));
+            data.setlongitude(String.valueOf(longitude));
+            data.setSpeed(String.valueOf(speed));
             Log.d("TAG",
                     "onLocationResult: Lat = " + latitude + " long = " + longitude);
+            new PostLocationData(getApplicationContext(),data.getUserID(),data.getlatitude(),data.getlongitude(),data.getSpeed(),data.getTimeStamp());
 
         }
     };
@@ -91,9 +105,15 @@ public class LocationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("TAG", "getParams: MYDATA1");
-        new PostLocationData(this,"awb","12.1","34.4","user","ts");
-        Log.d("TAG", "getParams: MYDATA2");
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+        userID = sharedpreferences.getString("UserID", null);
+        data.setUserID(userID);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Date instant=  Timestamp.from(Instant.now());
+//            Timestamp timestamp= Timestamp.valueOf(instant.toString());
+            data.setTimeStamp(instant.toString());
+        }
+
         if (intent != null) {
             String action = intent.getAction();
             if (action != null) {

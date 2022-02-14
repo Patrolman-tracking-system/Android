@@ -101,13 +101,24 @@ public class PostLocationData {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("Error", error.getMessage());
+                NetworkResponse response = error.networkResponse;
+                if (error instanceof ServerError && response != null) {
+                    try {
+                        String res = new String(response.data,
+                                HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                        // Now you can use any deserializer to make sense of data
+                        JSONObject obj = new JSONObject(res);
+                    } catch (UnsupportedEncodingException e1) {
+                        e1.printStackTrace();
+                    } catch (JSONException e2) {
+                        e2.printStackTrace();
+                    }
+                }
 
             }
+
         }) ;
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         requestQueue.add(request);
     }
-
-
 }

@@ -11,12 +11,17 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +29,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.newrailways.Tracking.LocationService;
@@ -38,9 +44,12 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 public class MainPage extends AppCompatActivity {
-
+    TextView startText;
     final int Request_CODE_FOR_FINE_LOCATION = 1;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+     int buttonCheck=0;
+    public static final String MyPREFERENCES = "UserDetails";
+    SharedPreferences sharedpreferences;
     @Override
     protected void onStart() {
         super.onStart();
@@ -56,6 +65,8 @@ public class MainPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        startText=findViewById(R.id.startText);
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
             setSupportActionBar(toolbar);
         }
@@ -68,13 +79,41 @@ public class MainPage extends AppCompatActivity {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                buttonCheck=1;
                 if (ContextCompat.checkSelfPermission(MainPage.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     askLocationPermission();
                 }
                 displayLocationSettingsRequest(MainPage.this);
                 if (ContextCompat.checkSelfPermission(MainPage.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    String flag = sharedpreferences.getString("flag", "1");
+                    Log.d(TAG, "onClick: FLAG: "+flag);
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+//                    if (flag == null) {
+//                        editor.putString("flag", "1");
+//                        flag="1";
+//                    }
 
-                    startLocationService();
+                    GradientDrawable shape =  new GradientDrawable();
+                    shape.setCornerRadius( 17 );
+
+                    if(flag.equals("1")){
+
+                        shape.setColor(0xFFFE5352);
+                        start.setBackground(shape);
+                        startText.setText("STOP TRACKING");
+                        editor.putString("flag", "0");
+                        editor.apply();
+                        startLocationService();
+
+                    }
+                    else{
+                        shape.setColor(0xFF369B46);
+                        start.setBackground(shape);
+                        startText.setText("START TRACKING");
+                        editor.putString("flag", "1");
+                        editor.apply();
+                        stopLocationService();
+                    }
                 }
             }
         });
@@ -117,7 +156,9 @@ public class MainPage extends AppCompatActivity {
 
             }
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startLocationService();
+                if(buttonCheck==1){
+                    startLocationService();
+                }
             }
 
         }
@@ -192,7 +233,6 @@ public class MainPage extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), LocationService.class);
             intent.setAction(com.example.railwaygeolocation.tracking.Constants.ACTION_START_LOCATION_SERVICE);
             startService(intent);
-            Toast.makeText(this, "Location Service Started", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -201,7 +241,6 @@ public class MainPage extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), LocationService.class);
             intent.setAction(com.example.railwaygeolocation.tracking.Constants.ACTION_STOP_LOCATION_SERVICE);
             startService(intent);
-            Toast.makeText(this, "Location Service Stopped", Toast.LENGTH_SHORT).show();
         }
     }
 }

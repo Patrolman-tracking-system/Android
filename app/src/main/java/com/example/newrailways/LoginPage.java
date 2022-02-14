@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.newrailways.APIdata.GetUsers;
+import com.example.newrailways.APIdata.LocationPojo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -20,7 +21,7 @@ public class LoginPage extends AppCompatActivity {
     TextInputEditText iD, pass;
     TextInputLayout idEL, passEL;
     CardView login;
-    public static final String MyPREFERENCES = "Login";
+    public static final String MyPREFERENCES = "UserDetails";
     SharedPreferences sharedpreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,8 @@ public class LoginPage extends AppCompatActivity {
         passEL = findViewById(R.id.Pass);
         login = findViewById(R.id.tkImg);
         sharedpreferences = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-        String name = sharedpreferences.getString("Name", null);
+        String name = sharedpreferences.getString("UserID", null);
+
         if (name != null) {
             startActivity(new Intent(LoginPage.this, MainPage.class));
         }
@@ -45,7 +47,7 @@ public class LoginPage extends AppCompatActivity {
 //            Toast.makeText(LoginPage.this, "Successfully Logged-in", Toast.LENGTH_SHORT).show();
             if(Objects.requireNonNull(iD.getText()).toString().equals("awb") && Objects.requireNonNull(pass.getText()).toString().equals("awb")) {
                 SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putString("Name", iD.getText().toString());
+                editor.putString("UserID", iD.getText().toString());
                 editor.putString("Password", pass.getText().toString());
                 editor.apply();
                 Toast.makeText(LoginPage.this, "Successfully Logged-in", Toast.LENGTH_SHORT).show();
