@@ -11,7 +11,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,8 +18,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -50,6 +47,7 @@ public class MainPage extends AppCompatActivity {
      int buttonCheck=0;
     public static final String MyPREFERENCES = "UserDetails";
     SharedPreferences sharedpreferences;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -72,9 +70,21 @@ public class MainPage extends AppCompatActivity {
         }
         CardView start = findViewById(R.id.startTrackingButton);
 //        Button stop = findViewById(R.id.stopTrackingButton);
+        String flag = sharedpreferences.getString("flag", "1");
+        Log.d(TAG, "onCreate: FLAG: "+flag);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
 
-
-
+        GradientDrawable shape =  new GradientDrawable();
+        if(flag.equals("0")){
+            shape.setColor(0xFFFE5352);
+            start.setBackground(shape);
+            startText.setText("STOP TRACKING");
+        }
+        else{
+            shape.setColor(0xFF369B46);
+            start.setBackground(shape);
+            startText.setText("START TRACKING");
+        }
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,18 +96,10 @@ public class MainPage extends AppCompatActivity {
                 displayLocationSettingsRequest(MainPage.this);
                 if (ContextCompat.checkSelfPermission(MainPage.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     String flag = sharedpreferences.getString("flag", "1");
-                    Log.d(TAG, "onClick: FLAG: "+flag);
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-//                    if (flag == null) {
-//                        editor.putString("flag", "1");
-//                        flag="1";
-//                    }
-
-                    GradientDrawable shape =  new GradientDrawable();
                     shape.setCornerRadius( 17 );
-
+                    Log.d(TAG, "onCreate: FLAG: "+flag);
                     if(flag.equals("1")){
-
+                        Log.d(TAG, "onClick: YESSS 2 ");
                         shape.setColor(0xFFFE5352);
                         start.setBackground(shape);
                         startText.setText("STOP TRACKING");
@@ -107,6 +109,7 @@ public class MainPage extends AppCompatActivity {
 
                     }
                     else{
+                        Log.d(TAG, "onClick: YESSS 3 ");
                         shape.setColor(0xFF369B46);
                         start.setBackground(shape);
                         startText.setText("START TRACKING");
@@ -114,6 +117,8 @@ public class MainPage extends AppCompatActivity {
                         editor.apply();
                         stopLocationService();
                     }
+                    Log.d(TAG, "onCreate: FLAG: "+flag);
+//                    startLocationService();
                 }
             }
         });
@@ -155,11 +160,11 @@ public class MainPage extends AppCompatActivity {
                 }
 
             }
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if(buttonCheck==1){
-                    startLocationService();
-                }
-            }
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                if(buttonCheck==1){
+//                    startLocationService();
+//                }
+//            }
 
         }
     }

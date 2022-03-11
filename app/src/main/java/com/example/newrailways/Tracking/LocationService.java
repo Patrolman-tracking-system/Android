@@ -14,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
+import android.telephony.TelephonyManager;
+import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -43,6 +45,7 @@ public class LocationService extends Service {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
+
             locationResult.getLastLocation();
             double latitude = locationResult.getLastLocation().getLatitude();
             double longitude = locationResult.getLastLocation().getLongitude();
@@ -50,9 +53,18 @@ public class LocationService extends Service {
             data.setlatitude(String.valueOf(latitude));
             data.setlongitude(String.valueOf(longitude));
             data.setSpeed(String.valueOf(speed));
-            Log.d("TAG",
-                    "onLocationResult: Lat = " + latitude + " long = " + longitude);
-            new PostLocationData(getApplicationContext(),data.getUserID(),data.getlatitude(),data.getlongitude(),data.getSpeed(),data.getTimeStamp());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && data.getlatitude()!=null && data.getlongitude()!=null) {
+                Date instant=  Timestamp.from(Instant.now());
+//            Timestamp timestamp= Timestamp.valueOf(instant.toString());
+                data.setTimeStamp(instant.toString());
+            }
+            if (locationResult.getLastLocation().hasAccuracy()){
+                new PostLocationData(getApplicationContext(),data.getUserID(),data.getlatitude(),data.getlongitude(),data.getSpeed(),data.getTimeStamp());
+            }
+            else{
+                new PostLocationData(getApplicationContext(),data.getUserID(),data.getlatitude(),data.getlongitude(),"NA",data.getTimeStamp());
+            }
+            Log.d("TAG", "onLocationResult: LAT "+latitude+" LONG "+longitude+" TIME "+ data.getTimeStamp());
 
         }
     };
@@ -84,9 +96,10 @@ public class LocationService extends Service {
 
             }
         }
+
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(2500);
+        locationRequest.setInterval(10000);
+//        locationRequest.setFastestInterval(10000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -108,11 +121,7 @@ public class LocationService extends Service {
         sharedpreferences = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
         userID = sharedpreferences.getString("UserID", null);
         data.setUserID(userID);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Date instant=  Timestamp.from(Instant.now());
-//            Timestamp timestamp= Timestamp.valueOf(instant.toString());
-            data.setTimeStamp(instant.toString());
-        }
+
 
         if (intent != null) {
             String action = intent.getAction();
